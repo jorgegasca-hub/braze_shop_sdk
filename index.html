@@ -16,7 +16,7 @@
   a { color: inherit; }
   code { word-break: break-all; font-size: 13px; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
- 
+
   .top { background: var(--paper); border-bottom: 1px solid var(--line); }
   .top-in { max-width: 1040px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
   .brand { font: 700 22px var(--serif); text-decoration: none; letter-spacing: .01em; }
@@ -26,12 +26,12 @@
   .pill { font-size: 12px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); background: var(--bg); white-space: nowrap; }
   .pill.id { color: var(--ok); border-color: var(--ok); }
   .cartlink b { background: var(--ink); color: var(--paper); border-radius: 99px; padding: 0 7px; font-size: 12px; margin-left: 4px; }
- 
+
   main { max-width: 1040px; margin: 0 auto; padding: 28px 20px 60px; }
   h1, h2 { font-family: var(--serif); margin: 0 0 8px; }
   h1 { font-size: 34px; line-height: 1.15; }
   .lede { color: var(--muted); max-width: 52ch; margin: 0 0 26px; }
- 
+
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
   .card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; display: flex; flex-direction: column; }
   .art { aspect-ratio: 1 / 1; display: grid; place-items: center; border-bottom: 1px solid var(--line); }
@@ -40,25 +40,25 @@
   .card h2 { font-size: 19px; }
   .price { font-weight: 600; }
   .muted { color: var(--muted); }
- 
+
   button, .btn { font: inherit; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); padding: 8px 14px; border-radius: 3px; cursor: pointer; text-decoration: none; display: inline-block; }
   button:hover, .btn:hover { background: var(--ink); color: var(--paper); }
   button.primary, .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   button.primary:hover, .btn.primary:hover { filter: brightness(1.1); background: var(--accent); }
   button.link { border: 0; background: none; padding: 0; text-decoration: underline; color: var(--muted); }
   button.link:hover { background: none; color: var(--ink); }
- 
+
   .pdp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
   @media (max-width: 760px) { .pdp, .two { grid-template-columns: 1fr !important; } }
   .pdp .art { border: 1px solid var(--line); background: var(--paper); }
   .buy { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
- 
+
   table { width: 100%; border-collapse: collapse; background: var(--paper); border: 1px solid var(--line); }
   th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
   th { font-weight: 600; color: var(--muted); font-size: 13px; }
   .qty { display: inline-flex; align-items: center; gap: 8px; }
   .qty button { padding: 2px 9px; }
- 
+
   .two { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 26px; align-items: start; }
   .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 18px; }
   form { display: grid; gap: 12px; }
@@ -68,20 +68,20 @@
   input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--ink); width: 100%; }
   .sum div { display: flex; justify-content: space-between; padding: 4px 0; }
   .sum .tot { font-weight: 700; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; }
- 
+
   footer { border-top: 1px solid var(--line); background: var(--paper); }
   .foot-in { max-width: 1040px; margin: 0 auto; padding: 22px 20px 70px; display: flex; gap: 28px; flex-wrap: wrap; align-items: end; justify-content: space-between; }
   .foot-in form { display: flex; gap: 8px; align-items: end; }
   .foot-in form label { min-width: 240px; }
- 
+
   #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 9px 16px; border-radius: 3px; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 50; }
   #toast.on { opacity: 1; }
- 
+
   #modal { position: fixed; inset: 0; background: rgba(10, 18, 16, .5); display: none; place-items: center; z-index: 40; padding: 20px; }
   #modal.on { display: grid; }
   #modal .box { background: var(--paper); max-width: 400px; width: 100%; padding: 26px; border-radius: 4px; position: relative; }
   #modal .x { position: absolute; top: 8px; right: 10px; border: 0; background: none; font-size: 22px; padding: 2px 8px; }
- 
+
   /* Tech drawer */
   #tabtn { position: fixed; right: 16px; bottom: 16px; z-index: 60; background: #12151a; color: #e6eaf0; border-color: #12151a; }
   #drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100%; background: #12151a; color: #d7dde5; z-index: 55; transform: translateX(100%); transition: transform .2s; display: flex; flex-direction: column; font-size: 13px; }
@@ -106,7 +106,7 @@
 </style>
 </head>
 <body>
- 
+
 <header class="top"><div class="top-in">
   <a class="brand" href="#/">Tidewater</a>
   <span class="pill" id="idpill">Anonymous</span>
@@ -116,9 +116,9 @@
     <a class="cartlink" href="#/cart">Cart<b id="cartcount">0</b></a>
   </nav>
 </div></header>
- 
+
 <main id="app"></main>
- 
+
 <footer><div class="foot-in">
   <div>
     <h2 style="font-size:18px">Fresh drops, once a month.</h2>
@@ -129,7 +129,7 @@
     <button class="primary">Subscribe</button>
   </form>
 </div></footer>
- 
+
 <div id="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
   <div class="box">
     <button class="x" data-act="closeModal" aria-label="Close">×</button>
@@ -141,9 +141,9 @@
     </form>
   </div>
 </div>
- 
+
 <div id="toast" role="status"></div>
- 
+
 <button id="tabtn" data-act="drawer">Tech panel</button>
 <aside id="drawer" aria-label="Tech panel">
   <div class="scroll">
@@ -161,7 +161,7 @@
         <button data-act="session">openSession</button>
       </div>
     </div>
- 
+
     <div class="sec">
       <h3>Settings</h3>
       <div class="row">
@@ -206,7 +206,7 @@
       <div class="row"><button class="primary" data-act="saveReload">Save and reload</button></div>
       <p class="hint">Settings live in this browser's localStorage. Use a different port per workspace.</p>
     </div>
- 
+
     <div class="sec">
       <h3>Tools</h3>
       <div class="row">
@@ -234,13 +234,13 @@
   </div>
   <div id="log"></div>
 </aside>
- 
+
 <script>
 (function () {
   "use strict";
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
- 
+
   /* ---------- catalog ---------- */
   const ART = {
     bag: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><path d="M28 22h44l6 66H22z"/><path d="M28 22l4-10h36l4 10"/><circle cx="50" cy="56" r="11"/><path d="M45 56c3-5 7 5 10 0"/></svg>',
@@ -256,7 +256,7 @@
   const money = n => new Intl.NumberFormat(undefined, { style: "currency", currency: cfg.currency || "AUD" }).format(n);
   const pageBase = () => location.origin + location.pathname;
   const img = p => "https://placehold.co/600x600/png?text=" + encodeURIComponent(p.name);
- 
+
   /* ---------- state ---------- */
   const CFG_KEY = "bz-shop-cfg", CART_KEY = "bz-shop-cart";
   const DEFAULT_CFG = { apiKey: "", baseUrl: "", sdkVersion: "7.1", swPath: new URL("service-worker.js", location.href).pathname, currency: "AUD", prefix: "ecommerce.", flushEach: true, alsoPurchase: false, verbose: true, popup: false, popupDelay: 8, emailGroup: "", smsGroup: "", initId: "", codeFormat: "esm", ecomMethod: "auto", allowJs: false };
@@ -266,7 +266,7 @@
   let cart = read(CART_KEY, { id: rid("cart"), items: [] });
   const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} paintCart(); };
   let lastOrder = null, checkoutId = null;
- 
+
   /* ---------- log ---------- */
   const logEl = $("#log");
   const codes = [];
@@ -310,7 +310,7 @@
   const fmt = () => cfg.codeFormat || "esm";
   const resolve = c => typeof c === "function" ? c(fmt()) : c;
   const q = s => JSON.stringify(s);
- 
+
   ["log", "info", "warn", "error"].forEach(level => {
     const orig = console[level].bind(console);
     console[level] = function () {
@@ -319,7 +319,7 @@
       if (/braze|appboy/i.test(s)) log("SDK: " + s, level === "error" ? "err" : "dim");
     };
   });
- 
+
   /* ---------- braze ---------- */
   let ready = false; const queue = [];
   function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("Failed to load " + src)); document.head.appendChild(s); }); }
@@ -376,7 +376,7 @@
     p.textContent = id ? "ID: " + id : "Anonymous";
     p.className = id ? "pill id" : "pill";
   }
- 
+
   /* ---------- tracking ---------- */
   const lines = () => cart.items.map(i => { const p = P[i.id]; return { product_id: p.id, product_name: p.name, variant_id: p.id + "-default", image_url: img(p), product_url: pageBase() + "#/p/" + p.id, quantity: i.qty, price: p.price }; });
   const total = () => cart.items.reduce((s, i) => s + P[i.id].price * i.qty, 0);
@@ -405,7 +405,7 @@
     log("  props", "dim", props);
   }
   const trackCart = () => track("cart_updated", Object.assign(base(), { cart_id: cart.id, total_value: total(), products: lines(), metadata: { cart_url: pageBase() + "#/cart" } }));
- 
+
   /* ---------- identity and forms ---------- */
   function identify(id) {
     if (!id) return;
@@ -437,7 +437,7 @@
     identify(acct.id);
     pushProfile(acct.email, acct.first);
   }
- 
+
   function profileCode(email, first) {
     const l = ["const user = braze.getUser();"];
     if (email) l.push("user.setEmail(" + q(email) + ");");
@@ -470,12 +470,12 @@
       braze.logCustomEvent("sms_opt_in", { source: source });
     }, "sms opt-in (" + source + ")", code);
   }
- 
+
   /* ---------- views ---------- */
   function artHtml(p) { return '<div class="art" style="background:' + p.tile + '">' + ART[p.art] + "</div>"; }
   function paintCart() { $("#cartcount").textContent = cart.items.reduce((s, i) => s + i.qty, 0); }
   function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), 1600); }
- 
+
   function viewShop() {
     return '<h1>Small-batch coffee gear.</h1><p class="lede">Three things we think are worth owning. Add them to your cart and test whatever you need to.</p><div class="grid">' +
       PRODUCTS.map(p => '<article class="card">' + '<a href="#/p/' + p.id + '">' + artHtml(p) + '</a>' +
@@ -542,7 +542,7 @@
     }
     $("#app").innerHTML = html; window.scrollTo(0, 0);
   }
- 
+
   /* ---------- actions ---------- */
   function changeQty(id, d) {
     const it = cart.items.find(i => i.id === id); if (!it) return;
@@ -602,7 +602,7 @@
     }
   };
   document.addEventListener("click", e => { const t = e.target.closest("[data-act]"); if (t && actions[t.dataset.act]) actions[t.dataset.act](t); });
- 
+
   document.addEventListener("submit", e => {
     const f = e.target.closest("form[data-form]"); if (!f) return;
     e.preventDefault();
@@ -633,7 +633,7 @@
       location.hash = "#/thanks";
     }
   });
- 
+
   /* ---------- boot ---------- */
   function fillDrawer() {
     const set = (id, v) => { $("#" + id).value = v; };
