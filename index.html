@@ -14,6 +14,7 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
   a { color: inherit; }
+  code { word-break: break-all; font-size: 13px; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   .top { background: var(--paper); border-bottom: 1px solid var(--line); }
@@ -256,7 +257,7 @@
 
   /* ---------- state ---------- */
   const CFG_KEY = "bz-shop-cfg", CART_KEY = "bz-shop-cart";
-  const DEFAULT_CFG = { apiKey: "", baseUrl: "", sdkVersion: "7.1", swPath: "/service-worker.js", currency: "AUD", prefix: "ecommerce.", flushEach: true, alsoPurchase: false, verbose: true, popup: false, popupDelay: 8, emailGroup: "", smsGroup: "", initId: "", codeFormat: "esm", ecomMethod: "auto" };
+  const DEFAULT_CFG = { apiKey: "", baseUrl: "", sdkVersion: "7.1", swPath: new URL("service-worker.js", location.href).pathname, currency: "AUD", prefix: "ecommerce.", flushEach: true, alsoPurchase: false, verbose: true, popup: false, popupDelay: 8, emailGroup: "", smsGroup: "", initId: "", codeFormat: "esm", ecomMethod: "auto" };
   const rid = p => p + "_" + Math.random().toString(36).slice(2, 10);
   function read(key, fallback) { try { return Object.assign({}, fallback, JSON.parse(localStorage.getItem(key) || "{}")); } catch (e) { return Object.assign({}, fallback); } }
   const cfg = read(CFG_KEY, DEFAULT_CFG);
@@ -406,9 +407,35 @@
   /* ---------- identity and forms ---------- */
   function identify(id) {
     if (!id) return;
-    bz(() => braze.changeUser(id), "changeUser(" + id + ")", "// Call once at login, with a stable internal ID (not an email)\nbraze.changeUser(" + q(id) + ");");
+    bz(() => braze.changeUser(id), "changeUser(" + id + ")", "// Call at login or sign-up, with the account ID your system generated when the account was created.\n// Use a stable internal ID, not an email. Call changeUser before setting attributes.\nbraze.changeUser(" + q(id) + ");");
     setTimeout(refreshIds, 400);
   }
+  /* ---------- accounts (a local stand-in for your customer database) ---------- */
+  const ACC_KEY = "bz-shop-accounts", SESSION_KEY = "bz-shop-session";
+  let accounts = read(ACC_KEY, {});
+  let session = read(SESSION_KEY, { email: "" });
+  const saveAccounts = () => { try { localStorage.setItem(ACC_KEY, JSON.stringify(accounts)); } catch (e) {} };
+  const saveSession = () => { try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch (e) {} };
+  const currentAccount = () => session.email ? accounts[session.email.toLowerCase()] || null : null;
+  const newAccountId = () => "acct_" + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+  function createAccount(email, first, customId) {
+    const key = email.toLowerCase();
+    if (accounts[key]) return { acct: accounts[key], existing: true };
+    const acct = { id: customId || newAccountId(), email: email, first: first || "", created: new Date().toISOString() };
+    accounts[key] = acct; saveAccounts();
+    log("Account created. Account ID: " + acct.id, "ok");
+    return { acct: acct, existing: false };
+  }
+  function pushProfile(email, first) {
+    bz(() => { const u = braze.getUser(); if (email) u.setEmail(email); if (first) u.setFirstName(first); }, "set profile attributes", profileCode(email, first));
+  }
+  // Identify the user in Braze with the account ID, then set attributes.
+  function login(acct) {
+    session.email = acct.email; saveSession();
+    identify(acct.id);
+    pushProfile(acct.email, acct.first);
+  }
+
   function profileCode(email, first) {
     const l = ["const user = braze.getUser();"];
     if (email) l.push("user.setEmail(" + q(email) + ");");
@@ -467,12 +494,14 @@
   }
   function viewCheckout() {
     if (!cart.items.length) return '<h1>Checkout</h1><p class="lede">Your cart is empty. <a href="#/">Back to shop</a></p>';
+    const acct = currentAccount();
     checkoutId = rid("chk");
     track("checkout_started", Object.assign(base(), { checkout_id: checkoutId, cart_id: cart.id, total_value: total(), products: lines() }));
     return '<h1>Checkout</h1><div class="two"><form class="panel" data-form="checkout"><h2>Your details</h2>' +
-      '<label>Email<input type="email" name="email" required autocomplete="email"></label>' +
-      '<label>First name<input name="first" autocomplete="given-name"></label>' +
-      '<label class="check"><input type="checkbox" name="identify"> <span>Create an account with this email (calls changeUser with the email as the external ID)</span></label>' +
+      '<label>Email<input type="email" name="email" required autocomplete="email" value="' + esc(acct ? acct.email : "") + '"></label>' +
+      '<label>First name<input name="first" autocomplete="given-name" value="' + esc(acct ? acct.first : "") + '"></label>' +
+      (acct ? '<p class="muted" style="margin:0">Signed in. Account ID <code>' + esc(acct.id) + '</code> is already the Braze external ID.</p>'
+            : '<label class="check"><input type="checkbox" name="identify"> <span>Create an account with this email (generates an account ID and calls changeUser with it)</span></label>') +
       '<label class="check"><input type="checkbox" name="marketing"> <span>Email me news and offers</span></label>' +
       '<label>Mobile number (optional, E.164)<input name="phone" placeholder="+61400000000" autocomplete="tel"></label>' +
       '<label class="check"><input type="checkbox" name="sms"> <span>Text me order updates and offers</span></label>' +
@@ -480,9 +509,20 @@
       '<div class="panel sum"><h2>Order summary</h2>' + cart.items.map(i => "<div><span>" + esc(P[i.id].name) + " × " + i.qty + "</span><span>" + money(P[i.id].price * i.qty) + "</span></div>").join("") + '<div class="tot"><span>Total</span><span>' + money(total()) + "</span></div></div></div>";
   }
   function viewAccount() {
-    return '<h1>Account</h1><div class="two"><form class="panel" data-form="signin"><h2>Sign in</h2><p class="muted" style="margin:0">Calls changeUser with the ID you enter, then sets the email and name.</p>' +
-      '<label>External ID<input name="id" required autocomplete="off" placeholder="user_1001"></label><label>Email<input type="email" name="email"></label><label>First name<input name="first"></label><button class="primary">Sign in</button></form>' +
-      '<div class="panel"><h2>Sign out</h2><p class="muted">The SDK can\'t un-identify a user. Signing out here wipes local SDK data and reloads, so the next visit starts as a fresh anonymous user with a new device ID.</p><button data-act="wipe">Sign out and start anonymous</button></div></div>';
+    const acct = currentAccount();
+    const list = Object.keys(accounts).map(k => accounts[k]);
+    const known = list.length
+      ? '<div class="panel" style="margin-top:18px"><h2>Accounts on this browser</h2><table><thead><tr><th>Email</th><th>Account ID (external ID)</th><th></th></tr></thead><tbody>' +
+        list.map(x => "<tr><td>" + esc(x.email) + "</td><td><code>" + esc(x.id) + '</code></td><td><button class="link" data-act="signinAs" data-email="' + esc(x.email) + '">Sign in</button></td></tr>').join("") + "</tbody></table></div>"
+      : "";
+    if (acct) return '<h1>Account</h1><div class="panel"><h2>Signed in</h2><p style="margin:0 0 8px">' + esc(acct.email) + (acct.first ? " (" + esc(acct.first) + ")" : "") +
+      '</p><p class="muted" style="margin:0 0 14px">Account ID sent to Braze as the external ID: <code>' + esc(acct.id) + '</code></p><button data-act="signout">Sign out and start anonymous</button></div>' + known;
+    return '<h1>Account</h1><div class="two"><form class="panel" data-form="signup"><h2>Create account</h2>' +
+      '<p class="muted" style="margin:0">Generates an account ID, then calls changeUser with it to identify the current anonymous user.</p>' +
+      '<label>Email<input type="email" name="email" required autocomplete="email"></label><label>First name<input name="first" autocomplete="given-name"></label>' +
+      '<label>Account ID (optional override for testing)<input name="id" autocomplete="off" placeholder="Leave blank to generate one"></label><button class="primary">Create account</button></form>' +
+      '<form class="panel" data-form="signin"><h2>Sign in</h2><p class="muted" style="margin:0">Looks up the account ID saved for this email and calls changeUser with it.</p>' +
+      '<label>Email<input type="email" name="email" required autocomplete="email"></label><button class="primary">Sign in</button></form></div>' + known;
   }
   function viewThanks() {
     return '<h1>Thanks for your order</h1><p class="lede">Order ' + esc(lastOrder || "") + ' was placed. This is a test shop, so nothing ships.</p><a class="btn" href="#/">Keep shopping</a>';
@@ -525,11 +565,14 @@
     session() { if (!ready) return log("SDK not ready", "err"); braze.openSession(); log("openSession()", "ok", undefined, "braze.openSession();"); },
     cards() { if (!ready) return log("SDK not ready", "err"); braze.requestContentCardsRefresh(() => log("Content Cards: " + braze.getCachedContentCards().cards.length + " card(s)", "ok"), () => log("Content Cards refresh failed, or the channel is not enabled", "err")); braze.toggleContentCards(); },
     clearCart() { cart = { id: rid("cart"), items: [] }; saveCart(); render(); log("Cart emptied locally (no event sent)", "dim"); },
-    wipe() { if (ready) braze.wipeData(); log("wipeData(). Reloading...", "ok"); setTimeout(() => location.reload(), 300); },
+    signinAs(t) { const found = accounts[t.dataset.email.toLowerCase()]; if (found) { login(found); toast("Signed in as " + found.email); render(); } },
+    signout() { actions.wipe(); },
+    wipe() { session.email = ""; saveSession(); if (ready) braze.wipeData(); log("wipeData(). Reloading...", "ok"); setTimeout(() => location.reload(), 300); },
     logout() {
       if (!ready) return log("SDK not ready", "err");
       if (typeof braze.logout !== "function") return log("logout() needs Web SDK 6.10.0 or later. Use wipeData instead.", "err");
       const r = braze.logout();
+      session.email = ""; saveSession();
       log("logout() called. It unregisters push, wipes local data and disables the SDK.", "ok", undefined, "braze.logout();");
       if (r && typeof r.then === "function") r.then(() => log("logout() finished", "ok"), e => log("logout() failed: " + (e && e.message || e), "err"));
     },
@@ -548,7 +591,7 @@
     saveReload() {
       const g = id => $("#" + id);
       cfg.apiKey = g("cApiKey").value.trim(); cfg.baseUrl = g("cBaseUrl").value.trim(); cfg.sdkVersion = g("cSdkVersion").value.trim() || "7.1";
-      cfg.swPath = g("cSwPath").value.trim() || "/service-worker.js"; cfg.currency = g("cCurrency").value.trim() || "AUD";
+      cfg.swPath = g("cSwPath").value.trim() || DEFAULT_CFG.swPath; cfg.currency = g("cCurrency").value.trim() || "AUD";
       cfg.emailGroup = g("cEmailGroup").value.trim(); cfg.smsGroup = g("cSmsGroup").value.trim(); cfg.initId = g("cInitId").value.trim();
       cfg.prefix = g("cPrefix").value; cfg.ecomMethod = g("cEcomMethod").value; cfg.flushEach = g("cFlushEach").checked; cfg.alsoPurchase = g("cAlsoPurchase").checked; cfg.verbose = g("cVerbose").checked;
       cfg.popup = g("cPopup").checked; cfg.popupDelay = Number(g("cPopupDelay").value) || 8;
@@ -566,14 +609,19 @@
     if (kind === "optin") {
       optInEmail(d.email.trim(), f.dataset.source);
       f.reset(); toast("You're on the list"); actions.closeModal();
+    } else if (kind === "signup") {
+      const r = createAccount(d.email.trim(), (d.first || "").trim(), (d.id || "").trim());
+      login(r.acct);
+      toast(r.existing ? "That account already existed. Signed in." : "Account created");
+      render();
     } else if (kind === "signin") {
-      identify(d.id.trim());
-      bz(() => { const u = braze.getUser(); if (d.email) u.setEmail(d.email.trim()); if (d.first) u.setFirstName(d.first.trim()); }, "set profile attributes", profileCode(d.email && d.email.trim(), d.first && d.first.trim()));
-      toast("Signed in as " + d.id.trim());
+      const found = accounts[d.email.trim().toLowerCase()];
+      if (!found) { toast("No account for that email. Create one first."); log("Sign in failed: no account for " + d.email.trim(), "err"); return; }
+      login(found); toast("Signed in as " + found.email); render();
     } else if (kind === "checkout") {
-      const email = d.email.trim();
-      if (d.identify) identify(email);
-      bz(() => { const u = braze.getUser(); u.setEmail(email); if (d.first) u.setFirstName(d.first.trim()); }, "set profile attributes", profileCode(email, d.first && d.first.trim()));
+      const email = d.email.trim(), first = (d.first || "").trim();
+      if (!currentAccount() && d.identify) login(createAccount(email, first).acct);
+      else pushProfile(email, first);
       if (d.marketing) optInEmail(email, "checkout");
       if (d.phone && d.sms) optInSms(d.phone.trim(), "checkout");
       const orderId = rid("ord");
