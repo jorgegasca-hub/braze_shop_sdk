@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tidewater Coffee Goods (Braze test shop)</title>
+<style>
+  :root {
+    --bg: #eef0ee; --paper: #fbfbfa; --ink: #16221f; --muted: #5f6b67; --line: #d3d9d5;
+    --accent: #1f4fd8; --accent-ink: #fff; --ok: #12794b; --err: #b3261e;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .top { background: var(--paper); border-bottom: 1px solid var(--line); }
+  .top-in { max-width: 1040px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .brand { font: 700 22px var(--serif); text-decoration: none; letter-spacing: .01em; }
+  nav { display: flex; gap: 16px; margin-left: auto; align-items: center; }
+  nav a { text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  .pill { font-size: 12px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); background: var(--bg); white-space: nowrap; }
+  .pill.id { color: var(--ok); border-color: var(--ok); }
+  .cartlink b { background: var(--ink); color: var(--paper); border-radius: 99px; padding: 0 7px; font-size: 12px; margin-left: 4px; }
+
+  main { max-width: 1040px; margin: 0 auto; padding: 28px 20px 60px; }
+  h1, h2 { font-family: var(--serif); margin: 0 0 8px; }
+  h1 { font-size: 34px; line-height: 1.15; }
+  .lede { color: var(--muted); max-width: 52ch; margin: 0 0 26px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; display: flex; flex-direction: column; }
+  .art { aspect-ratio: 1 / 1; display: grid; place-items: center; border-bottom: 1px solid var(--line); }
+  .art svg { width: 52%; height: auto; color: var(--ink); }
+  .card .meta { padding: 14px 16px 16px; display: grid; gap: 6px; }
+  .card h2 { font-size: 19px; }
+  .price { font-weight: 600; }
+  .muted { color: var(--muted); }
+
+  button, .btn { font: inherit; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); padding: 8px 14px; border-radius: 3px; cursor: pointer; text-decoration: none; display: inline-block; }
+  button:hover, .btn:hover { background: var(--ink); color: var(--paper); }
+  button.primary, .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button.primary:hover, .btn.primary:hover { filter: brightness(1.1); background: var(--accent); }
+  button.link { border: 0; background: none; padding: 0; text-decoration: underline; color: var(--muted); }
+  button.link:hover { background: none; color: var(--ink); }
+
+  .pdp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  @media (max-width: 760px) { .pdp, .two { grid-template-columns: 1fr !important; } }
+  .pdp .art { border: 1px solid var(--line); background: var(--paper); }
+  .buy { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--paper); border: 1px solid var(--line); }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  th { font-weight: 600; color: var(--muted); font-size: 13px; }
+  .qty { display: inline-flex; align-items: center; gap: 8px; }
+  .qty button { padding: 2px 9px; }
+
+  .two { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 26px; align-items: start; }
+  .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 18px; }
+  form { display: grid; gap: 12px; }
+  label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  label.check { display: flex; gap: 8px; align-items: flex-start; color: var(--ink); font-size: 14px; }
+  label.check input { width: auto; margin-top: 4px; }
+  input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--ink); width: 100%; }
+  .sum div { display: flex; justify-content: space-between; padding: 4px 0; }
+  .sum .tot { font-weight: 700; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; }
+
+  footer { border-top: 1px solid var(--line); background: var(--paper); }
+  .foot-in { max-width: 1040px; margin: 0 auto; padding: 22px 20px 70px; display: flex; gap: 28px; flex-wrap: wrap; align-items: end; justify-content: space-between; }
+  .foot-in form { display: flex; gap: 8px; align-items: end; }
+  .foot-in form label { min-width: 240px; }
+
+  #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 9px 16px; border-radius: 3px; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 50; }
+  #toast.on { opacity: 1; }
+
+  #modal { position: fixed; inset: 0; background: rgba(10, 18, 16, .5); display: none; place-items: center; z-index: 40; padding: 20px; }
+  #modal.on { display: grid; }
+  #modal .box { background: var(--paper); max-width: 400px; width: 100%; padding: 26px; border-radius: 4px; position: relative; }
+  #modal .x { position: absolute; top: 8px; right: 10px; border: 0; background: none; font-size: 22px; padding: 2px 8px; }
+
+  /* Tech drawer */
+  #tabtn { position: fixed; right: 16px; bottom: 16px; z-index: 60; background: #12151a; color: #e6eaf0; border-color: #12151a; }
+  #drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100%; background: #12151a; color: #d7dde5; z-index: 55; transform: translateX(100%); transition: transform .2s; display: flex; flex-direction: column; font-size: 13px; }
+  #drawer.on { transform: none; }
+  #drawer h3 { margin: 0 0 8px; font-size: 13px; color: #fff; }
+  #drawer .sec { padding: 12px 14px; border-bottom: 1px solid #2a2f37; }
+  #drawer .scroll { overflow: auto; flex: 1; }
+  #drawer label { color: #98a1ad; font-size: 12px; }
+  #drawer input, #drawer select { background: #0c0e11; color: #e6eaf0; border-color: #343a43; padding: 5px 7px; font-size: 12px; }
+  #drawer .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  #drawer .row > label { flex: 1 1 120px; }
+  #drawer button { background: #1c2026; color: #e6eaf0; border-color: #3a414b; padding: 4px 9px; font-size: 12px; }
+  #drawer button:hover { background: #2a3038; color: #fff; }
+  #drawer button.primary { background: #3d5be0; border-color: #3d5be0; }
+  #drawer label.check { color: #d7dde5; font-size: 12px; }
+  #drawer .kv { display: grid; grid-template-columns: 90px 1fr; gap: 4px 8px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; word-break: break-all; }
+  #drawer .kv span:nth-child(odd) { color: #98a1ad; }
+  #log { height: 260px; overflow: auto; background: #0a0c0f; padding: 8px 10px; font: 11.5px/1.5 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; word-break: break-word; border-top: 1px solid #2a2f37; }
+  #log button.copy { margin-left: 8px; padding: 0 6px; font-size: 11px; line-height: 18px; vertical-align: baseline; }
+  .ok { color: #55c58d; } .err { color: #ff8a80; } .dim { color: #8b95a1; }
+  #drawer .hint { color: #8b95a1; margin: 4px 0 0; }
+</style>
+</head>
+<body>
+
+<header class="top"><div class="top-in">
+  <a class="brand" href="#/">Tidewater</a>
+  <span class="pill" id="idpill">Anonymous</span>
+  <nav>
+    <a href="#/">Shop</a>
+    <a href="#/account">Account</a>
+    <a class="cartlink" href="#/cart">Cart<b id="cartcount">0</b></a>
+  </nav>
+</div></header>
+
+<main id="app"></main>
+
+<footer><div class="foot-in">
+  <div>
+    <h2 style="font-size:18px">Fresh drops, once a month.</h2>
+    <p class="muted" style="margin:0">No spam. Unsubscribe anytime.</p>
+  </div>
+  <form data-form="optin" data-source="footer">
+    <label>Email<input type="email" name="email" required autocomplete="email"></label>
+    <button class="primary">Subscribe</button>
+  </form>
+</div></footer>
+
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <div class="box">
+    <button class="x" data-act="closeModal" aria-label="Close">×</button>
+    <h2 id="mt">Take 10% off your first order</h2>
+    <p class="muted">Join the list and we'll send the code.</p>
+    <form data-form="optin" data-source="popup">
+      <label>Email<input type="email" name="email" required autocomplete="email"></label>
+      <button class="primary">Get my code</button>
+    </form>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<button id="tabtn" data-act="drawer">Tech panel</button>
+<aside id="drawer" aria-label="Tech panel">
+  <div class="scroll">
+    <div class="sec">
+      <h3>Identity</h3>
+      <div class="kv">
+        <span>External ID</span><span id="kExt">-</span>
+        <span>Device ID</span><span id="kDev">-</span>
+        <span>SDK</span><span id="kSdk">not initialized</span>
+        <span>Methods</span><span id="kCompat" style="white-space:pre-line">-</span>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button data-act="refreshIds">Refresh</button>
+        <button data-act="flush">Flush now</button>
+        <button data-act="session">openSession</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h3>Settings</h3>
+      <div class="row">
+        <label>API key (Web)<input id="cApiKey" autocomplete="off"></label>
+        <label>SDK endpoint<input id="cBaseUrl" placeholder="sdk.iad-01.braze.com" autocomplete="off"></label>
+      </div>
+      <div class="row">
+        <label>SDK version<input id="cSdkVersion"></label>
+        <label>Service worker path<input id="cSwPath"></label>
+        <label>Currency<input id="cCurrency"></label>
+      </div>
+      <div class="row">
+        <label>Email subscription group ID<input id="cEmailGroup" autocomplete="off"></label>
+        <label>SMS subscription group ID<input id="cSmsGroup" autocomplete="off"></label>
+      </div>
+      <div class="row">
+        <label>Identify on load (optional)<input id="cInitId" autocomplete="off"></label>
+        <label>Event names
+          <select id="cPrefix">
+            <option value="ecommerce.">Recommended (ecommerce.*)</option>
+            <option value="">Plain (product_viewed...)</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label>Ecommerce logging method
+          <select id="cEcomMethod">
+            <option value="auto">Auto: logEcommerceEvent on 6.8+, else logCustomEvent</option>
+            <option value="custom">Always logCustomEvent</option>
+          </select>
+        </label>
+      </div>
+      <label class="check"><input type="checkbox" id="cFlushEach"> Flush after every action</label>
+      <label class="check"><input type="checkbox" id="cAlsoPurchase"> Also call logPurchase on order (revenue)</label>
+      <label class="check"><input type="checkbox" id="cVerbose"> Verbose SDK logging</label>
+      <div class="row" style="margin-top:6px">
+        <label class="check" style="flex:0 0 auto"><input type="checkbox" id="cPopup"> Show opt-in popup after</label>
+        <label style="flex:0 0 80px"><input type="number" id="cPopupDelay" min="1"></label>
+        <span class="dim" style="align-self:center">seconds</span>
+      </div>
+      <div class="row"><button class="primary" data-act="saveReload">Save and reload</button></div>
+      <p class="hint">Settings live in this browser's localStorage. Use a different port per workspace.</p>
+    </div>
+
+    <div class="sec">
+      <h3>Tools</h3>
+      <div class="row">
+        <label>Copied code format
+          <select id="cCodeFormat">
+            <option value="esm">JavaScript, ES module (import)</option>
+            <option value="global">JavaScript, global (CDN script)</option>
+            <option value="ts">TypeScript</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <button data-act="popupNow">Show opt-in popup</button>
+        <button data-act="cards">Toggle Content Cards</button>
+        <button data-act="clearCart">Empty cart (no event)</button>
+        <button data-act="wipe">wipeData and reload</button>
+        <button data-act="logout">logout() (6.10+)</button>
+        <button data-act="enable">enableSDK</button>
+        <button data-act="copyAll">Copy all code</button>
+        <button data-act="clearLog">Clear log</button>
+      </div>
+      <p class="hint">Every logged SDK call has a Copy code button. Copy all code joins them in order, as an implementation reference. The format applies at copy time, so you can switch it after the fact.</p>
+      <p class="hint">Events sent: product_viewed, cart_updated, checkout_started, order_placed (names depend on the setting above). Abandoned cart = cart_updated with no checkout_started or order_placed afterwards.</p>
+    </div>
+  </div>
+  <div id="log"></div>
+</aside>
+
+<script>
+(function () {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* ---------- catalog ---------- */
+  const ART = {
+    bag: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><path d="M28 22h44l6 66H22z"/><path d="M28 22l4-10h36l4 10"/><circle cx="50" cy="56" r="11"/><path d="M45 56c3-5 7 5 10 0"/></svg>',
+    kettle: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M26 44h40l-3 40H29z"/><path d="M66 50c18-2 22-22 8-30"/><path d="M26 50C16 48 10 38 14 28"/><path d="M36 44c0-8 20-8 20 0"/><path d="M44 36h4"/></svg>',
+    mug: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M24 34h46v34a14 14 0 0 1-14 14H38a14 14 0 0 1-14-14z"/><path d="M70 42h6a10 10 0 0 1 0 22h-6"/><path d="M38 22c-3 4 3 6 0 10M50 22c-3 4 3 6 0 10"/></svg>'
+  };
+  const PRODUCTS = [
+    { id: "beans-yirgacheffe", name: "Yirgacheffe whole beans", price: 24, tile: "#dce6d9", art: "bag", desc: "250g of light-roast Ethiopian coffee. Citrus, jasmine, a clean finish." },
+    { id: "kettle-gooseneck", name: "Gooseneck kettle", price: 89, tile: "#d8dfe9", art: "kettle", desc: "Stainless steel, 900ml, with a fine spout for slow, even pour-overs." },
+    { id: "mug-stoneware", name: "Stoneware mug", price: 32, tile: "#e5dfd8", art: "mug", desc: "Hand-glazed, 350ml, dishwasher safe. Holds heat longer than it looks." }
+  ];
+  const P = Object.fromEntries(PRODUCTS.map(p => [p.id, p]));
+  const money = n => new Intl.NumberFormat(undefined, { style: "currency", currency: cfg.currency || "AUD" }).format(n);
+  const img = p => "https://placehold.co/600x600/png?text=" + encodeURIComponent(p.name);
+
+  /* ---------- state ---------- */
+  const CFG_KEY = "bz-shop-cfg", CART_KEY = "bz-shop-cart";
+  const DEFAULT_CFG = { apiKey: "", baseUrl: "", sdkVersion: "7.1", swPath: "/service-worker.js", currency: "AUD", prefix: "ecommerce.", flushEach: true, alsoPurchase: false, verbose: true, popup: false, popupDelay: 8, emailGroup: "", smsGroup: "", initId: "", codeFormat: "esm", ecomMethod: "auto" };
+  const rid = p => p + "_" + Math.random().toString(36).slice(2, 10);
+  function read(key, fallback) { try { return Object.assign({}, fallback, JSON.parse(localStorage.getItem(key) || "{}")); } catch (e) { return Object.assign({}, fallback); } }
+  const cfg = read(CFG_KEY, DEFAULT_CFG);
+  let cart = read(CART_KEY, { id: rid("cart"), items: [] });
+  const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} paintCart(); };
+  let lastOrder = null, checkoutId = null;
+
+  /* ---------- log ---------- */
+  const logEl = $("#log");
+  const codes = [];
+  function log(msg, cls, obj, code) {
+    const d = document.createElement("div");
+    if (cls) d.className = cls;
+    let t = "[" + new Date().toLocaleTimeString() + "] " + msg;
+    if (obj !== undefined) { try { t += " " + JSON.stringify(obj); } catch (e) { t += " " + String(obj); } }
+    const span = document.createElement("span"); span.textContent = t; d.appendChild(span);
+    if (code) {
+      codes.push({ label: msg, code: code });
+      const b = document.createElement("button");
+      b.className = "copy"; b.textContent = "Copy code"; b.dataset.act = "copy"; b.dataset.i = codes.length - 1;
+      d.appendChild(b);
+    }
+    logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight;
+  }
+  function copyText(text, done) {
+    const fallback = () => {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done && done(); } catch (e) { log("Copy failed. Select the text manually.", "err"); }
+      ta.remove();
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(() => done && done(), fallback);
+    else fallback();
+  }
+  // Object literal with unquoted keys where valid, e.g. { product_id: "x" }
+  const lit = (v, ind) => {
+    ind = ind || "";
+    if (v === null || typeof v !== "object") return JSON.stringify(v);
+    const next = ind + "  ";
+    if (Array.isArray(v)) return v.length ? "[\n" + v.map(x => next + lit(x, next)).join(",\n") + "\n" + ind + "]" : "[]";
+    const keys = Object.keys(v);
+    if (!keys.length) return "{}";
+    return "{\n" + keys.map(k => next + (/^[A-Za-z_$][\w$]*$/.test(k) ? k : JSON.stringify(k)) + ": " + lit(v[k], next)).join(",\n") + "\n" + ind + "}";
+  };
+  const js = o => lit(o);
+  const IMPORT_LINE = 'import * as braze from "@braze/web-sdk";';
+  const fmt = () => cfg.codeFormat || "esm";
+  const resolve = c => typeof c === "function" ? c(fmt()) : c;
+  const q = s => JSON.stringify(s);
+
+  ["log", "info", "warn", "error"].forEach(level => {
+    const orig = console[level].bind(console);
+    console[level] = function () {
+      orig.apply(null, arguments);
+      const s = Array.prototype.map.call(arguments, a => { if (typeof a === "string") return a; try { return JSON.stringify(a); } catch (e) { return String(a); } }).join(" ");
+      if (/braze|appboy/i.test(s)) log("SDK: " + s, level === "error" ? "err" : "dim");
+    };
+  });
+
+  /* ---------- braze ---------- */
+  let ready = false; const queue = [];
+  function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("Failed to load " + src)); document.head.appendChild(s); }); }
+  function bz(fn, label, code) {
+    if (!ready) { queue.push([fn, label, code]); log(label + " (queued: SDK not ready)", "dim"); return; }
+    try { const r = fn(); log(label + (typeof r === "string" ? " via " + r : ""), "ok", undefined, code); if (cfg.flushEach) braze.requestImmediateDataFlush(() => { log("flushed", "dim"); refreshIds(); }); }
+    catch (e) { log(label + ": " + e.message, "err"); }
+  }
+  async function initBraze() {
+    if (!cfg.apiKey || !cfg.baseUrl) { log("Add your API key and SDK endpoint, then Save and reload.", "err"); $("#drawer").classList.add("on"); return; }
+    try {
+      if (!window.braze) await loadScript("https://js.appboycdn.com/web-sdk/" + cfg.sdkVersion + "/braze.min.js");
+      const ok = braze.initialize(cfg.apiKey, { baseUrl: cfg.baseUrl.replace(/^https?:\/\//, ""), enableLogging: !!cfg.verbose, serviceWorkerLocation: cfg.swPath });
+      if (!ok) { log("initialize() returned false. Check key and endpoint.", "err"); return; }
+      braze.subscribeToInAppMessage(m => { log("In-app message received", "ok", { type: m.constructor && m.constructor.name, message: m.message, extras: m.extras }); braze.showInAppMessage(m); });
+      if (cfg.initId) braze.changeUser(cfg.initId);
+      braze.openSession();
+      ready = true;
+      $("#kSdk").textContent = (braze.getSdkVersion ? braze.getSdkVersion() : cfg.sdkVersion);
+      log("Braze initialized", "ok", undefined, f => {
+        const init = 'braze.initialize("YOUR_API_KEY", {\n  baseUrl: ' + q(cfg.baseUrl.replace(/^https?:\/\//, "")) + ',\n  serviceWorkerLocation: ' + q(cfg.swPath) + '\n});\n' +
+          'braze.automaticallyShowInAppMessages();\n' + (cfg.initId ? 'braze.changeUser(' + q(cfg.initId) + ');\n' : '') + 'braze.openSession();';
+        if (f === "global") return '// 1. Load the SDK before your own scripts (pin a version you have tested):\n// <script src="https://js.appboycdn.com/web-sdk/' + cfg.sdkVersion + '/braze.min.js"><\/script>\n// 2. In a script that runs after it, braze is a global:\n' + init;
+        return IMPORT_LINE + '\n\n' + init;
+      });
+      paintCompat();
+      if (typeof braze.isDisabled === "function" && braze.isDisabled()) log("The SDK is disabled (disableSDK or logout). Click enableSDK to resume.", "err");
+      checkServiceWorker();
+      queue.splice(0).forEach(([fn, label, code]) => bz(fn, label, code));
+      refreshIds();
+    } catch (e) { log(e.message, "err"); }
+  }
+  const FEATURES = [["requestBannersRefresh", "5.6+"], ["logEcommerceEvent", "6.8+"], ["logout", "6.10+"], ["registerPush", "6.11+"], ["subscribeToContentCardsEvents", "7.0+"], ["subscribeToFeatureFlagsEvents", "7.0+"], ["insertWebTargetingBanners", "7.1+"]];
+  function paintCompat() {
+    $("#kCompat").textContent = FEATURES.map(f => (typeof braze[f[0]] === "function" ? "\u2713 " : "\u2717 ") + f[0] + " (" + f[1] + ")").join("\n");
+  }
+  // The SDK and its service worker should be on the same version.
+  function checkServiceWorker() {
+    fetch(cfg.swPath).then(r => r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status))).then(t => {
+      const m = t.match(/web-sdk\/([\d.]+)\/service-worker/);
+      if (!m) return log("Could not read a version from " + cfg.swPath, "dim");
+      if (m[1] !== cfg.sdkVersion) log("Service worker loads SDK " + m[1] + " but the page uses " + cfg.sdkVersion + ". Update service-worker.js so they match.", "err");
+      else log("Service worker version matches (" + m[1] + ")", "dim");
+    }).catch(e => log("Service worker check skipped: " + e.message, "dim"));
+  }
+  function refreshIds() {
+    if (!ready) return;
+    // v5: these return their value directly. The callback forms are deprecated.
+    const dev = braze.getDeviceId();
+    const id = braze.getUser().getUserId();
+    $("#kDev").textContent = dev || "-";
+    $("#kExt").textContent = id || "(anonymous)";
+    const p = $("#idpill");
+    p.textContent = id ? "ID: " + id : "Anonymous";
+    p.className = id ? "pill id" : "pill";
+  }
+
+  /* ---------- tracking ---------- */
+  const lines = () => cart.items.map(i => { const p = P[i.id]; return { product_id: p.id, product_name: p.name, variant_id: p.id + "-default", image_url: img(p), product_url: location.origin + "/#/p/" + p.id, quantity: i.qty, price: p.price }; });
+  const total = () => cart.items.reduce((s, i) => s + P[i.id].price * i.qty, 0);
+  const base = () => ({ currency: cfg.currency, source: location.origin, metadata: {} });
+  const ECOM_KINDS = ["product_viewed", "cart_updated", "checkout_started", "order_placed"];
+  function track(kind, props) {
+    const name = cfg.prefix + kind;
+    let used = "logCustomEvent";
+    bz(() => {
+      const useApi = cfg.prefix === "ecommerce." && cfg.ecomMethod !== "custom" && ECOM_KINDS.indexOf(kind) !== -1 && typeof braze.logEcommerceEvent === "function";
+      if (useApi) { braze.logEcommerceEvent({ name: name, properties: props }); used = "logEcommerceEvent"; }
+      else braze.logCustomEvent(name, props);
+      return used;
+    }, name, f => {
+      if (used === "logEcommerceEvent") {
+        const note = "// Web SDK 6.8.0+. On older SDKs use braze.logCustomEvent(name, properties) instead.\n";
+        return f === "ts"
+          ? note + "const properties: Record<string, unknown> = " + js(props) + ";\nbraze.logEcommerceEvent({ name: " + q(name) + ", properties });"
+          : note + "braze.logEcommerceEvent(" + js({ name: name, properties: props }) + ");";
+      }
+      const note = cfg.prefix === "ecommerce." ? "// Works on every version. On Web SDK 6.8.0+, braze.logEcommerceEvent is the recommended call.\n" : "";
+      return f === "ts"
+        ? note + "const properties: Record<string, unknown> = " + js(props) + ";\nbraze.logCustomEvent(" + q(name) + ", properties);"
+        : note + "braze.logCustomEvent(" + q(name) + ", " + js(props) + ");";
+    });
+    log("  props", "dim", props);
+  }
+  const trackCart = () => track("cart_updated", Object.assign(base(), { cart_id: cart.id, total_value: total(), products: lines() }));
+
+  /* ---------- identity and forms ---------- */
+  function identify(id) {
+    if (!id) return;
+    bz(() => braze.changeUser(id), "changeUser(" + id + ")", "// Call once at login, with a stable internal ID (not an email)\nbraze.changeUser(" + q(id) + ");");
+    setTimeout(refreshIds, 400);
+  }
+  function profileCode(email, first) {
+    const l = ["const user = braze.getUser();"];
+    if (email) l.push("user.setEmail(" + q(email) + ");");
+    if (first) l.push("user.setFirstName(" + q(first) + ");");
+    return l.join("\n");
+  }
+  function optInEmail(email, source) {
+    const code = ["const user = braze.getUser();",
+      "user.setEmail(" + q(email) + ");",
+      'user.setEmailNotificationSubscriptionType("opted_in");']
+      .concat(cfg.emailGroup ? ["user.addToSubscriptionGroup(" + q(cfg.emailGroup) + ");"] : [])
+      .concat(["braze.logCustomEvent(\"newsletter_opt_in\", { source: " + q(source) + " });"]).join("\n");
+    bz(() => {
+      const u = braze.getUser();
+      u.setEmail(email);
+      u.setEmailNotificationSubscriptionType("opted_in");
+      if (cfg.emailGroup) u.addToSubscriptionGroup(cfg.emailGroup);
+      braze.logCustomEvent("newsletter_opt_in", { source: source });
+    }, "email opt-in (" + source + ")", code);
+  }
+  function optInSms(phone, source) {
+    const code = ["const user = braze.getUser();",
+      "user.setPhoneNumber(" + q(phone) + ");"]
+      .concat(cfg.smsGroup ? ["user.addToSubscriptionGroup(" + q(cfg.smsGroup) + ");"] : [])
+      .concat(["braze.logCustomEvent(\"sms_opt_in\", { source: " + q(source) + " });"]).join("\n");
+    bz(() => {
+      const u = braze.getUser();
+      u.setPhoneNumber(phone);
+      if (cfg.smsGroup) u.addToSubscriptionGroup(cfg.smsGroup);
+      braze.logCustomEvent("sms_opt_in", { source: source });
+    }, "sms opt-in (" + source + ")", code);
+  }
+
+  /* ---------- views ---------- */
+  function artHtml(p) { return '<div class="art" style="background:' + p.tile + '">' + ART[p.art] + "</div>"; }
+  function paintCart() { $("#cartcount").textContent = cart.items.reduce((s, i) => s + i.qty, 0); }
+  function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), 1600); }
+
+  function viewShop() {
+    return '<h1>Small-batch coffee gear.</h1><p class="lede">Three things we think are worth owning. Add them to your cart and test whatever you need to.</p><div class="grid">' +
+      PRODUCTS.map(p => '<article class="card">' + '<a href="#/p/' + p.id + '">' + artHtml(p) + '</a>' +
+        '<div class="meta"><h2><a href="#/p/' + p.id + '" style="text-decoration:none">' + esc(p.name) + '</a></h2><span class="price">' + money(p.price) + '</span>' +
+        '<div><button data-act="add" data-id="' + p.id + '">Add to cart</button></div></div></article>').join("") + "</div>";
+  }
+  function viewProduct(id) {
+    const p = P[id]; if (!p) return "<p>Product not found. <a href='#/'>Back to shop</a></p>";
+    track("product_viewed", Object.assign(base(), { product_id: p.id, product_name: p.name, variant_id: p.id + "-default", image_url: img(p), product_url: location.origin + "/#/p/" + p.id, price: p.price }));
+    return '<p><a href="#/">Back to shop</a></p><div class="pdp">' + artHtml(p) + '<div><h1>' + esc(p.name) + '</h1><p class="price" style="font-size:20px">' + money(p.price) + '</p><p class="muted">' + esc(p.desc) +
+      '</p><div class="buy"><label style="display:flex;gap:8px;align-items:center;flex-direction:row">Qty <select id="pq" style="width:70px">' + [1, 2, 3, 4, 5].map(n => "<option>" + n + "</option>").join("") + '</select></label><button class="primary" data-act="add" data-id="' + p.id + '" data-pdp="1">Add to cart</button></div></div></div>';
+  }
+  function viewCart() {
+    if (!cart.items.length) return '<h1>Your cart</h1><p class="lede">It\'s empty. <a href="#/">Find something to add.</a></p>';
+    return '<h1>Your cart</h1><table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th></th></tr></thead><tbody>' +
+      cart.items.map(i => { const p = P[i.id]; return "<tr><td>" + esc(p.name) + '</td><td><span class="qty"><button data-act="dec" data-id="' + p.id + '" aria-label="Decrease">-</button>' + i.qty + '<button data-act="inc" data-id="' + p.id + '" aria-label="Increase">+</button></span></td><td>' + money(p.price * i.qty) + '</td><td><button class="link" data-act="rm" data-id="' + p.id + '">Remove</button></td></tr>'; }).join("") +
+      '</tbody></table><div class="sum" style="max-width:320px;margin:18px 0 0 auto"><div class="tot"><span>Subtotal</span><span>' + money(total()) + '</span></div><p style="text-align:right"><a class="btn primary" href="#/checkout">Check out</a></p></div>';
+  }
+  function viewCheckout() {
+    if (!cart.items.length) return '<h1>Checkout</h1><p class="lede">Your cart is empty. <a href="#/">Back to shop</a></p>';
+    checkoutId = rid("chk");
+    track("checkout_started", Object.assign(base(), { checkout_id: checkoutId, cart_id: cart.id, total_value: total(), products: lines() }));
+    return '<h1>Checkout</h1><div class="two"><form class="panel" data-form="checkout"><h2>Your details</h2>' +
+      '<label>Email<input type="email" name="email" required autocomplete="email"></label>' +
+      '<label>First name<input name="first" autocomplete="given-name"></label>' +
+      '<label class="check"><input type="checkbox" name="identify"> <span>Create an account with this email (calls changeUser with the email as the external ID)</span></label>' +
+      '<label class="check"><input type="checkbox" name="marketing"> <span>Email me news and offers</span></label>' +
+      '<label>Mobile number (optional, E.164)<input name="phone" placeholder="+61400000000" autocomplete="tel"></label>' +
+      '<label class="check"><input type="checkbox" name="sms"> <span>Text me order updates and offers</span></label>' +
+      '<button class="primary">Place order</button></form>' +
+      '<div class="panel sum"><h2>Order summary</h2>' + cart.items.map(i => "<div><span>" + esc(P[i.id].name) + " × " + i.qty + "</span><span>" + money(P[i.id].price * i.qty) + "</span></div>").join("") + '<div class="tot"><span>Total</span><span>' + money(total()) + "</span></div></div></div>";
+  }
+  function viewAccount() {
+    return '<h1>Account</h1><div class="two"><form class="panel" data-form="signin"><h2>Sign in</h2><p class="muted" style="margin:0">Calls changeUser with the ID you enter, then sets the email and name.</p>' +
+      '<label>External ID<input name="id" required autocomplete="off" placeholder="user_1001"></label><label>Email<input type="email" name="email"></label><label>First name<input name="first"></label><button class="primary">Sign in</button></form>' +
+      '<div class="panel"><h2>Sign out</h2><p class="muted">The SDK can\'t un-identify a user. Signing out here wipes local SDK data and reloads, so the next visit starts as a fresh anonymous user with a new device ID.</p><button data-act="wipe">Sign out and start anonymous</button></div></div>';
+  }
+  function viewThanks() {
+    return '<h1>Thanks for your order</h1><p class="lede">Order ' + esc(lastOrder || "") + ' was placed. This is a test shop, so nothing ships.</p><a class="btn" href="#/">Keep shopping</a>';
+  }
+  function render() {
+    const h = location.hash.replace(/^#\/?/, "").split("/");
+    let html;
+    switch (h[0]) {
+      case "p": html = viewProduct(h[1]); break;
+      case "cart": html = viewCart(); break;
+      case "checkout": html = viewCheckout(); break;
+      case "account": html = viewAccount(); break;
+      case "thanks": html = viewThanks(); break;
+      default: html = viewShop();
+    }
+    $("#app").innerHTML = html; window.scrollTo(0, 0);
+  }
+
+  /* ---------- actions ---------- */
+  function changeQty(id, d) {
+    const it = cart.items.find(i => i.id === id); if (!it) return;
+    it.qty += d; if (it.qty <= 0) cart.items = cart.items.filter(i => i.id !== id);
+    saveCart(); trackCart(); render();
+  }
+  const actions = {
+    add(t) {
+      const id = t.dataset.id, q = t.dataset.pdp ? Number($("#pq").value) : 1;
+      const it = cart.items.find(i => i.id === id);
+      if (it) it.qty += q; else cart.items.push({ id: id, qty: q });
+      saveCart(); trackCart(); toast("Added " + P[id].name);
+    },
+    inc(t) { changeQty(t.dataset.id, 1); },
+    dec(t) { changeQty(t.dataset.id, -1); },
+    rm(t) { const it = cart.items.find(i => i.id === t.dataset.id); if (it) changeQty(it.id, -it.qty); },
+    drawer() { $("#drawer").classList.toggle("on"); },
+    closeModal() { $("#modal").classList.remove("on"); try { sessionStorage.setItem("bz-popup-seen", "1"); } catch (e) {} },
+    popupNow() { $("#modal").classList.add("on"); },
+    refreshIds() { if (!ready) return log("SDK not ready", "err"); refreshIds(); },
+    flush() { if (!ready) return log("SDK not ready", "err"); braze.requestImmediateDataFlush(() => { log("flushed", "ok"); refreshIds(); }); },
+    session() { if (!ready) return log("SDK not ready", "err"); braze.openSession(); log("openSession()", "ok", undefined, "braze.openSession();"); },
+    cards() { if (!ready) return log("SDK not ready", "err"); braze.requestContentCardsRefresh(() => log("Content Cards: " + braze.getCachedContentCards().cards.length + " card(s)", "ok"), () => log("Content Cards refresh failed, or the channel is not enabled", "err")); braze.toggleContentCards(); },
+    clearCart() { cart = { id: rid("cart"), items: [] }; saveCart(); render(); log("Cart emptied locally (no event sent)", "dim"); },
+    wipe() { if (ready) braze.wipeData(); log("wipeData(). Reloading...", "ok"); setTimeout(() => location.reload(), 300); },
+    logout() {
+      if (!ready) return log("SDK not ready", "err");
+      if (typeof braze.logout !== "function") return log("logout() needs Web SDK 6.10.0 or later. Use wipeData instead.", "err");
+      const r = braze.logout();
+      log("logout() called. It unregisters push, wipes local data and disables the SDK.", "ok", undefined, "braze.logout();");
+      if (r && typeof r.then === "function") r.then(() => log("logout() finished", "ok"), e => log("logout() failed: " + (e && e.message || e), "err"));
+    },
+    enable() { if (!ready) return log("SDK not ready", "err"); braze.enableSDK(); log("enableSDK()", "ok", undefined, "braze.enableSDK();"); refreshIds(); },
+    clearLog() { logEl.textContent = ""; codes.length = 0; },
+    copy(t) {
+      const c = codes[Number(t.dataset.i)]; if (!c) return;
+      copyText(resolve(c.code), () => { const old = t.textContent; t.textContent = "Copied"; setTimeout(() => { t.textContent = old; }, 1200); });
+    },
+    copyAll() {
+      if (!codes.length) return log("Nothing to copy yet. Use the shop first.", "err");
+      const header = fmt() === "global" ? "// Assumes the SDK script is already loaded, so braze is a global.\n\n" : IMPORT_LINE + "\n\n";
+      const body = codes.map(c => "// " + c.label + "\n" + resolve(c.code).replace(IMPORT_LINE + "\n\n", "")).join("\n\n");
+      copyText(header + body, () => toast("Copied " + codes.length + " snippets"));
+    },
+    saveReload() {
+      const g = id => $("#" + id);
+      cfg.apiKey = g("cApiKey").value.trim(); cfg.baseUrl = g("cBaseUrl").value.trim(); cfg.sdkVersion = g("cSdkVersion").value.trim() || "7.1";
+      cfg.swPath = g("cSwPath").value.trim() || "/service-worker.js"; cfg.currency = g("cCurrency").value.trim() || "AUD";
+      cfg.emailGroup = g("cEmailGroup").value.trim(); cfg.smsGroup = g("cSmsGroup").value.trim(); cfg.initId = g("cInitId").value.trim();
+      cfg.prefix = g("cPrefix").value; cfg.ecomMethod = g("cEcomMethod").value; cfg.flushEach = g("cFlushEach").checked; cfg.alsoPurchase = g("cAlsoPurchase").checked; cfg.verbose = g("cVerbose").checked;
+      cfg.popup = g("cPopup").checked; cfg.popupDelay = Number(g("cPopupDelay").value) || 8;
+      try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
+      location.reload();
+    }
+  };
+  document.addEventListener("click", e => { const t = e.target.closest("[data-act]"); if (t && actions[t.dataset.act]) actions[t.dataset.act](t); });
+
+  document.addEventListener("submit", e => {
+    const f = e.target.closest("form[data-form]"); if (!f) return;
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f).entries());
+    const kind = f.dataset.form;
+    if (kind === "optin") {
+      optInEmail(d.email.trim(), f.dataset.source);
+      f.reset(); toast("You're on the list"); actions.closeModal();
+    } else if (kind === "signin") {
+      identify(d.id.trim());
+      bz(() => { const u = braze.getUser(); if (d.email) u.setEmail(d.email.trim()); if (d.first) u.setFirstName(d.first.trim()); }, "set profile attributes", profileCode(d.email && d.email.trim(), d.first && d.first.trim()));
+      toast("Signed in as " + d.id.trim());
+    } else if (kind === "checkout") {
+      const email = d.email.trim();
+      if (d.identify) identify(email);
+      bz(() => { const u = braze.getUser(); u.setEmail(email); if (d.first) u.setFirstName(d.first.trim()); }, "set profile attributes", profileCode(email, d.first && d.first.trim()));
+      if (d.marketing) optInEmail(email, "checkout");
+      if (d.phone && d.sms) optInSms(d.phone.trim(), "checkout");
+      const orderId = rid("ord");
+      track("order_placed", Object.assign(base(), { order_id: orderId, cart_id: cart.id, total_value: total(), products: lines() }));
+      if (cfg.alsoPurchase) cart.items.forEach(i => bz(() => braze.logPurchase(i.id, P[i.id].price, cfg.currency, i.qty), "logPurchase(" + i.id + ")", "braze.logPurchase(" + q(i.id) + ", " + P[i.id].price + ", " + q(cfg.currency) + ", " + i.qty + ");"));
+      lastOrder = orderId; cart = { id: rid("cart"), items: [] }; saveCart();
+      location.hash = "#/thanks";
+    }
+  });
+
+  /* ---------- boot ---------- */
+  function fillDrawer() {
+    const set = (id, v) => { $("#" + id).value = v; };
+    set("cApiKey", cfg.apiKey); set("cBaseUrl", cfg.baseUrl); set("cSdkVersion", cfg.sdkVersion); set("cSwPath", cfg.swPath); set("cCurrency", cfg.currency);
+    set("cEmailGroup", cfg.emailGroup); set("cSmsGroup", cfg.smsGroup); set("cInitId", cfg.initId); set("cPrefix", cfg.prefix); set("cEcomMethod", cfg.ecomMethod); set("cPopupDelay", cfg.popupDelay);
+    $("#cFlushEach").checked = !!cfg.flushEach; $("#cAlsoPurchase").checked = !!cfg.alsoPurchase; $("#cVerbose").checked = !!cfg.verbose; $("#cPopup").checked = !!cfg.popup;
+  }
+  fillDrawer(); paintCart();
+  $("#cCodeFormat").value = cfg.codeFormat;
+  $("#cCodeFormat").addEventListener("change", e => {
+    cfg.codeFormat = e.target.value;
+    try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (err) {}
+    log("Copy format set to " + e.target.selectedOptions[0].text, "dim");
+  });
+  window.addEventListener("hashchange", render);
+  render();
+  initBraze();
+  if (cfg.popup) { let seen = false; try { seen = !!sessionStorage.getItem("bz-popup-seen"); } catch (e) {} if (!seen) setTimeout(() => $("#modal").classList.add("on"), cfg.popupDelay * 1000); }
+  if (!window.isSecureContext) log("Not a secure context. Serve over http://localhost, not file://.", "err");
+})();
+</script>
+</body>
+</html>
